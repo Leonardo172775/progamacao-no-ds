@@ -1,0 +1,23 @@
+class Veiculo:
+    def calcular_custo(self, distancia):
+        raise NotImplementedError("Este método deve ser sobrescrito pelas subclasses")
+
+class Carro(Veiculo):
+    def calcular_custo(self, distancia):
+        return distancia * 0.8  # Custo atualizado para R$0,80 por km
+
+class Bicicleta(Veiculo):
+    def calcular_custo(self, distancia):
+        return distancia * 0.28  # Custo atualizado para R$0,28 por km
+
+class Caminhao(Veiculo):
+    def calcular_custo(self, distancia):
+        return distancia * 1.32  # Custo atualizado para R$1,32 por km
+
+# Uso do polimorfismo
+veiculos = [Carro(), Bicicleta(), Caminhao()]
+distancia = 100  # Exemplo de distância
+
+for veiculo in veiculos:
+    custo = veiculo.calcular_custo(distancia)
+    print(f"Custo de viagem com {veiculo.__class__.__name__}: R${custo:.2f}")
