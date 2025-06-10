@@ -15,7 +15,13 @@ def encontrar_maior(lista):
         if numero > maior:
             maior = numero
     return maior
-
+# Função para encontrar o menor número na lista
+def encontrar_menor(lista):
+    menor = lista[0] # Inicializa com o primeiro elemento
+    for numero in lista:
+        if numero < menor: # Compara se o número atual é MENOR
+            menor = numero # Atualiza o MENOR
+    return menor
 # Adicionando o número 60 à lista
 numeros.append(60)
 
@@ -29,7 +35,9 @@ print("Soma dos números:", soma)
 # Encontrando e exibindo o maior número na lista
 maior_numero = encontrar_maior(numeros)
 print("Maior número na lista:", maior_numero)
-
+# Encontrando e exibindo o menor número na lista
+menor_numero = encontrar_menor(numeros)
+print("Menor número na lista:", menor_numero)
 # Função para calcular a média dos elementos na lista
 def calcular_media(lista):
     soma = calcular_soma(lista)
