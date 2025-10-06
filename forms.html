@@ -14,7 +14,7 @@
 
   <label for="listBoxClientes">Clientes:</label>
   <select id="listBoxClientes" size="5"></select>
-  <button onclick="buscarCliente()">Buscar Cliente</button>
+  <button id="btnBuscar">Buscar Cliente</button>
 
   <h3>Dados do Cliente</h3>
   <input type="text" id="txtNome" placeholder="Nome">
@@ -22,119 +22,132 @@
   <input type="text" id="txtTelefone" placeholder="Telefone">
   <input type="email" id="txtEmail" placeholder="Email">
 
-  <button onclick="incluirCliente()">Incluir Cliente</button>
-  <button onclick="alterarCliente()">Alterar Cliente</button>
-  <!-- Botão será criado via JavaScript -->
+  <button id="btnIncluir">Incluir Cliente</button>
+  <button id="btnAlterar">Alterar Cliente</button>
 
   <script>
-    // Inicialização
-    if (!localStorage.getItem("clientes")) {
-    const clientesIniciais = [
-        { id: 1, nome: "João Silva", endereco: "Rua A", telefone: "123456", email: "joao@gmail.com" },
-        { id: 2, nome: "Maria Oliveira", endereco: "Rua B", telefone: "654321", email: "maria@gmail.com" }
-    ];
-    localStorage.setItem("clientes", JSON.stringify(clientesIniciais));
-    }
-
-    const listBox = document.getElementById("listBoxClientes");
-
-    function carregarLista() {
-    listBox.innerHTML = "";
-    const listaClientes = JSON.parse(localStorage.getItem("clientes")) || [];
-    listaClientes.forEach(cliente => {
-        const option = document.createElement("option");
-        option.value = cliente.id;
-        option.textContent = `${cliente.id} - ${cliente.nome}`;
-        listBox.appendChild(option);
-    });
-    }
-
-    function buscarCliente() {
-    const listaClientes = JSON.parse(localStorage.getItem("clientes")) || [];
-    const selectedId = parseInt(listBox.value);
-    const cliente = listaClientes.find(c => c.id === selectedId);
-    if (cliente) {
-        document.getElementById("txtNome").value = cliente.nome;
-        document.getElementById("txtEndereco").value = cliente.endereco;
-        document.getElementById("txtTelefone").value = cliente.telefone;
-        document.getElementById("txtEmail").value = cliente.email;
-    }
-    }
-
-    function validarCampos() {
-    const nome = document.getElementById("txtNome").value.trim();
-    const endereco = document.getElementById("txtEndereco").value.trim();
-    const telefone = document.getElementById("txtTelefone").value.trim();
-    const email = document.getElementById("txtEmail").value.trim();
-    return nome && endereco && telefone && email;
-    }
-
-    function incluirCliente() {
-    if (!validarCampos()) {
-        alert("Preencha todos os campos antes de incluir.");
-        return;
-    }
-
-    const listaClientes = JSON.parse(localStorage.getItem("clientes")) || [];
-    const novoId = listaClientes.length ? Math.max(...listaClientes.map(c => c.id)) + 1 : 1;
-
-    const novoCliente = {
-        id: novoId,
-        nome: document.getElementById("txtNome").value.trim(),
-        endereco: document.getElementById("txtEndereco").value.trim(),
-        telefone: document.getElementById("txtTelefone").value.trim(),
-        email: document.getElementById("txtEmail").value.trim()
-    };
-
-    listaClientes.push(novoCliente);
-    localStorage.setItem("clientes", JSON.stringify(listaClientes));
-    carregarLista();
-    limparCampos();
-    }
-
-    function alterarCliente() {
-    const selectedId = parseInt(listBox.value);
-    if (isNaN(selectedId)) {
-        alert("Selecione um cliente para alterar.");
-        return;
-    }
-
-    if (!validarCampos()) {
-        alert("Preencha todos os campos antes de alterar.");
-        return;
-    }
-
-    const listaClientes = JSON.parse(localStorage.getItem("clientes")) || [];
-    const clienteIndex = listaClientes.findIndex(c => c.id === selectedId);
-    if (clienteIndex !== -1) {
-        listaClientes[clienteIndex] = {
-        id: selectedId,
-        nome: document.getElementById("txtNome").value.trim(),
-        endereco: document.getElementById("txtEndereco").value.trim(),
-        telefone: document.getElementById("txtTelefone").value.trim(),
-        email: document.getElementById("txtEmail").value.trim()
+    class ClienteManager {
+      constructor() {
+        this.listBox = document.getElementById("listBoxClientes");
+        this.campos = {
+          nome: document.getElementById("txtNome"),
+          endereco: document.getElementById("txtEndereco"),
+          telefone: document.getElementById("txtTelefone"),
+          email: document.getElementById("txtEmail")
         };
+        this.inicializarDados();
+        this.carregarLista();
+        this.criarBotaoLimpar();
+      }
+
+      inicializarDados() {
+        if (!localStorage.getItem("clientes")) {
+          const clientesIniciais = [
+            { id: 1, nome: "João Silva", endereco: "Rua A", telefone: "123456", email: "joao@gmail.com" },
+            { id: 2, nome: "Maria Oliveira", endereco: "Rua B", telefone: "654321", email: "maria@gmail.com" }
+          ];
+          localStorage.setItem("clientes", JSON.stringify(clientesIniciais));
+        }
+      }
+
+      carregarLista() {
+        this.listBox.innerHTML = "";
+        const listaClientes = this.obterClientes();
+        listaClientes.forEach(cliente => {
+          const option = document.createElement("option");
+          option.value = cliente.id;
+          option.textContent = `${cliente.id} - ${cliente.nome}`;
+          this.listBox.appendChild(option);
+        });
+      }
+
+      obterClientes() {
+        return JSON.parse(localStorage.getItem("clientes")) || [];
+      }
+
+      buscarCliente() {
+        const selectedId = parseInt(this.listBox.value);
+        const cliente = this.obterClientes().find(c => c.id === selectedId);
+        if (cliente) {
+          this.campos.nome.value = cliente.nome;
+          this.campos.endereco.value = cliente.endereco;
+          this.campos.telefone.value = cliente.telefone;
+          this.campos.email.value = cliente.email;
+        }
+      }
+
+      validarCampos() {
+        return Object.values(this.campos).every(campo => campo.value.trim());
+      }
+
+      incluirCliente() {
+        if (!this.validarCampos()) {
+          alert("Preencha todos os campos antes de incluir.");
+          return;
+        }
+
+        const listaClientes = this.obterClientes();
+        const novoId = listaClientes.length ? Math.max(...listaClientes.map(c => c.id)) + 1 : 1;
+
+        const novoCliente = {
+          id: novoId,
+          nome: this.campos.nome.value.trim(),
+          endereco: this.campos.endereco.value.trim(),
+          telefone: this.campos.telefone.value.trim(),
+          email: this.campos.email.value.trim()
+        };
+
+        listaClientes.push(novoCliente);
         localStorage.setItem("clientes", JSON.stringify(listaClientes));
-        carregarLista();
-        limparCampos();
-    }
+        this.carregarLista();
+        this.limparCampos();
+      }
+
+      alterarCliente() {
+        const selectedId = parseInt(this.listBox.value);
+        if (isNaN(selectedId)) {
+          alert("Selecione um cliente para alterar.");
+          return;
+        }
+
+        if (!this.validarCampos()) {
+          alert("Preencha todos os campos antes de alterar.");
+          return;
+        }
+
+        const listaClientes = this.obterClientes();
+        const clienteIndex = listaClientes.findIndex(c => c.id === selectedId);
+        if (clienteIndex !== -1) {
+          listaClientes[clienteIndex] = {
+            id: selectedId,
+            nome: this.campos.nome.value.trim(),
+            endereco: this.campos.endereco.value.trim(),
+            telefone: this.campos.telefone.value.trim(),
+            email: this.campos.email.value.trim()
+          };
+          localStorage.setItem("clientes", JSON.stringify(listaClientes));
+          this.carregarLista();
+          this.limparCampos();
+        }
+      }
+
+      limparCampos() {
+        Object.values(this.campos).forEach(campo => campo.value = "");
+      }
+
+      criarBotaoLimpar() {
+        const btnLimpar = document.createElement("button");
+        btnLimpar.textContent = "Limpar campos";
+        btnLimpar.onclick = () => this.limparCampos();
+        document.body.appendChild(btnLimpar);
+      }
     }
 
-    function limparCampos() {
-    document.getElementById("txtNome").value = "";
-    document.getElementById("txtEndereco").value = "";
-    document.getElementById("txtTelefone").value = "";
-    document.getElementById("txtEmail").value = "";
-    }
-
-    // Criar botão "Limpar campos" via JavaScript
-    const btnLimpar = document.createElement("button");
-    btnLimpar.textContent = "Limpar campos";
-    btnLimpar.onclick = limparCampos;
-    document.body.appendChild(btnLimpar);
-
-    // Carregar lista ao iniciar
-    carregarLista();
+    // Instanciando e conectando eventos
+    const clienteManager = new ClienteManager();
+    document.getElementById("btnBuscar").onclick = () => clienteManager.buscarCliente();
+    document.getElementById("btnIncluir").onclick = () => clienteManager.incluirCliente();
+    document.getElementById("btnAlterar").onclick = () => clienteManager.alterarCliente();
   </script>
 </body>
 </html>
