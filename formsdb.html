@@ -2,29 +2,118 @@
 <html>
 <head>
   <title>Gestão de Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h2, h3 {
+      color: #333;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .secondary {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    li {
+      background-color: #fff;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .actions button {
+      margin-left: 5px;
+    }
+
+    #mensagem {
+      margin-bottom: 10px;
+      color: green;
+    }
+  </style>
 </head>
 <body>
   <h2>Cadastro de Clientes</h2>
-  <input id="nome" placeholder="Nome" />
-  <input id="endereco" placeholder="Endereço" />
-  <input id="telefone" placeholder="Telefone" />
-  <button onclick="adicionarCliente()">Adicionar</button>
+  <div class="form-container">
+    <input id="nome" placeholder="Nome" />
+    <input id="endereco" placeholder="Endereço" />
+    <input id="telefone" placeholder="Telefone" />
+    <button id="btnAdicionar" class="primary" onclick="adicionarCliente()">Adicionar</button>
+    <button class="secondary" onclick="limparCampos()">Limpar</button>
+    <div id="mensagem"></div>
+  </div>
 
-  <h3>Lista de Clientes</h3>
+  <input id="busca" placeholder="Buscar cliente..." oninput="filtrarClientes()" />
+  <button class="secondary" onclick="ordenarClientes()">Ordenar A-Z</button>
+  <h3>Lista de Clientes (<span id="contador">0</span>)</h3>
   <ul id="listaClientes"></ul>
 
   <script>
+    let editando = false;
+    let indiceEdicao = null;
+
     function carregarClientes() {
       const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
       const lista = document.getElementById('listaClientes');
+      const contador = document.getElementById('contador');
       lista.innerHTML = '';
       clientes.forEach((cliente, index) => {
         const item = document.createElement('li');
-        item.textContent = `${cliente.nome} - ${cliente.endereco} - ${cliente.telefone}`;
-        item.innerHTML += ` <button onclick="editarCliente(${index})">Editar</button>
-                            <button onclick="excluirCliente(${index})">Excluir</button>`;
+        item.innerHTML = `<span>${cliente.nome} - ${cliente.endereco} - ${cliente.telefone}</span>
+                          <div class="actions">
+                            <button onclick="editarCliente(${index})">Editar</button>
+                            <button onclick="confirmarExclusao(${index})">Excluir</button>
+                          </div>`;
         lista.appendChild(item);
       });
+      contador.textContent = clientes.length;
     }
 
     function adicionarCliente() {
@@ -32,9 +121,38 @@
       const endereco = document.getElementById('endereco').value;
       const telefone = document.getElementById('telefone').value;
       const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
-      clientes.push({ nome, endereco, telefone });
+
+      if (editando) {
+        clientes[indiceEdicao] = { nome, endereco, telefone };
+        document.getElementById('btnAdicionar').textContent = 'Adicionar';
+        mostrarMensagem('Cliente atualizado com sucesso!');
+        editando = false;
+        indiceEdicao = null;
+      } else {
+        clientes.push({ nome, endereco, telefone });
+        mostrarMensagem('Cliente adicionado com sucesso!');
+      }
+
       localStorage.setItem('clientes', JSON.stringify(clientes));
       carregarClientes();
+      limparCampos();
+    }
+
+    function editarCliente(index) {
+      const clientes = JSON.parse(localStorage.getItem('clientes'));
+      const cliente = clientes[index];
+      document.getElementById('nome').value = cliente.nome;
+      document.getElementById('endereco').value = cliente.endereco;
+      document.getElementById('telefone').value = cliente.telefone;
+      document.getElementById('btnAdicionar').textContent = 'Salvar';
+      editando = true;
+      indiceEdicao = index;
+    }
+
+    function confirmarExclusao(index) {
+      if (confirm('Deseja realmente excluir este cliente?')) {
+        excluirCliente(index);
+      }
     }
 
     function excluirCliente(index) {
@@ -44,17 +162,47 @@
       carregarClientes();
     }
 
-    function editarCliente(index) {
-      const clientes = JSON.parse(localStorage.getItem('clientes'));
-      const cliente = clientes[index];
-      document.getElementById('nome').value = cliente.nome;
-      document.getElementById('endereco').value = cliente.endereco;
-      document.getElementById('telefone').value = cliente.telefone;
-      excluirCliente(index);
+    function limparCampos() {
+      document.getElementById('nome').value = '';
+      document.getElementById('endereco').value = '';
+      document.getElementById('telefone').value = '';
+      document.getElementById('btnAdicionar').textContent = 'Adicionar';
+      editando = false;
+      indiceEdicao = null;
+    }
+
+    function mostrarMensagem(texto) {
+      const msg = document.getElementById('mensagem');
+      msg.textContent = texto;
+      setTimeout(() => msg.textContent = '', 3000);
+    }
+
+    function ordenarClientes() {
+      const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+      clientes.sort((a, b) => a.nome.localeCompare(b.nome));
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+      carregarClientes();
+    }
+
+    function filtrarClientes() {
+      const termo = document.getElementById('busca').value.toLowerCase();
+      const clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+      const lista = document.getElementById('listaClientes');
+      lista.innerHTML = '';
+      const filtrados = clientes.filter(c => c.nome.toLowerCase().includes(termo));
+      filtrados.forEach((cliente, index) => {
+        const item = document.createElement('li');
+        item.innerHTML = `<span>${cliente.nome} - ${cliente.endereco} - ${cliente.telefone}</span>
+                          <div class="actions">
+                            <button onclick="editarCliente(${index})">Editar</button>
+                            <button onclick="confirmarExclusao(${index})">Excluir</button>
+                          </div>`;
+        lista.appendChild(item);
+      });
+      document.getElementById('contador').textContent = filtrados.length;
     }
 
     carregarClientes();
   </script>
 </body>
 </html>
-
