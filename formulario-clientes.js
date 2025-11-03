@@ -41,7 +41,8 @@
       db.run(`INSERT INTO Clientes (Id, Nome, Email)
               VALUES (1, 'Ana', 'ana@email.com');`);
     });
-
+db.run(`INSERT INTO Clientes (Id, Nome, Email) VALUES (2, 'Bruno', 'bruno@email.com');`);
+db.run(`INSERT INTO Clientes (Id, Nome, Email) VALUES (3, 'Rose', 'rose@email.com');`);
     // Função para buscar cliente pelo ID
     function buscarCliente() {
       // Pega o valor digitado no campo de busca
