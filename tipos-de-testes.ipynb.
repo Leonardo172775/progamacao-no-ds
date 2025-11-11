@@ -1,0 +1,50 @@
+# Lista global que armazenará os números adicionados
+numbers = []
+
+# Função para adicionar um número à lista
+def add_number(n):
+    numbers.append(n)  # Adiciona o número à lista
+    print(f"Número {n} adicionado. Lista atual: {numbers}")  # Exibe o número adicionado e o estado atual da lista
+
+# Função para remover um número da lista, se ele existir
+def remove_number(n):
+    if n in numbers:  # Verifica se o número está na lista
+        numbers.remove(n)  # Remove o número
+        print(f"Número {n} removido. Lista atual: {numbers}")  # Exibe confirmação e estado da lista
+    else:
+        print(f"Número {n} não encontrado na lista.")  # Informa que o número não está presente
+
+# Função para calcular a média dos números na lista
+def average():
+    if not numbers:  # Verifica se a lista está vazia
+        print("Lista vazia. Média = 0")  # Mensagem informativa
+        return 0  # Retorna 0 como média padrão
+    media = sum(numbers) / len(numbers)  # Calcula a média
+    print(f"Média atual dos números {numbers} = {media}")  # Exibe a média e os números usados
+    return media  # Retorna o valor da média
+
+# 🔍 Exemplos de uso das funções
+
+# Adiciona o número 10 à lista
+add_number(10)     # Esperado: Lista atual: [10]
+
+# Adiciona o número 20 à lista
+add_number(20)     # Esperado: Lista atual: [10, 20]
+
+# Adiciona o número 30 à lista
+add_number(30)     # Esperado: Lista atual: [10, 20, 30]
+
+# Adiciona o número 30 à lista
+add_number(40)     # Esperado: Lista atual: [10, 20, 30, 40]
+
+# Calcula a média dos números atuais
+average()          # Esperado: Média = (10 + 20 + 30 + 40) / 4 = 25.0
+
+# Remove o número 10 da lista
+remove_number(10)  # Esperado: Lista atual: [20, 30, 40]
+
+# Calcula a nova média após a remoção
+average()          # Esperado: Média = (20 + 30 + 40) / 3 = 30.0
+
+# Tenta remover o número 50, que não está na lista
+remove_number(50)  # Esperado: Mensagem de número não encontrado
